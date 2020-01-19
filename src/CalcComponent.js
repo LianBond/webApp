@@ -37,13 +37,48 @@ render() {
         let ans = above/below;
         console.log(ans)
         if (!isNaN(ans)) {
-          document.getElementById('z').innerHTML = 'Your monthly payment is: R'+ans;
-
+          document.getElementById('z').innerHTML = 'Your monthly payment is: R'+ (Math.round(ans*100)/100);
+          term = term/12;
+          r=r*12;
+          above = r*(pp-dep);
+          below = 1-Math.pow((1+r),(-1*term));
+          ans = above/below;
+          let cnt = 1;
+          let left = 0;
           let loanAmount = pp-dep;
           let afterNMonth = loanAmount*(1+r)-ans;
           let percentagePaidToCapital = ((loanAmount-afterNMonth)/loanAmount)*100;
           let percentagePaidToInterest = 100 - percentagePaidToCapital;
-          console.log(percentagePaidToCapital);
+          let content='';
+          percentagePaidToInterest =  Math.round(percentagePaidToInterest);
+          percentagePaidToCapital = Math.round(percentagePaidToCapital);
+          document.getElementById('bodPercentage').innerHTML = '';
+          content +='<tr>';
+          content += '<td>' + cnt + '</td>';
+          content += '<td>' + percentagePaidToInterest+'%' + '</td>';
+          content += '<td>' + percentagePaidToCapital+'%' + '</td>';
+          content += '</tr>';
+          document.getElementById('bodPercentage').innerHTML = content;
+          content ='';
+          while (afterNMonth>=0.01) {
+            cnt++;
+            afterNMonth = afterNMonth*(1+r)-ans;
+            percentagePaidToCapital = ((loanAmount-afterNMonth)/loanAmount)*100;
+            percentagePaidToInterest = 100 - percentagePaidToCapital;
+            percentagePaidToInterest =  Math.round(percentagePaidToInterest);
+            percentagePaidToCapital = Math.round(percentagePaidToCapital);
+            if (percentagePaidToCapital>100) {
+              percentagePaidToCapital = 100;
+              percentagePaidToInterest = 0;
+            }
+            content +='<tr>';
+            content += '<td>' + cnt + '</td>';
+            content += '<td>' + percentagePaidToInterest+'%' + '</td>';
+            content += '<td>' + percentagePaidToCapital+'%' + '</td>';
+            content += '</tr>';
+            document.getElementById('bodPercentage').innerHTML = content;
+          }
+          console.log(cnt);
         } else {
           alert('Math Error. Please input valid values')
         }
@@ -80,10 +115,15 @@ render() {
       let dep = document.getElementById('dep').value;
       let term = (document.getElementById('term').value)*12;
       let r = (document.getElementById('r').value)/100/12;
+      
       let name = (document.getElementById('name').value);
       let above = r*(pp-dep);
       let below = 1-Math.pow((1+r),(-1*term));
       let ans = above/below;
+      ans = (Math.round(ans*100)/100);
+      term = term/12;
+      r = r*100*12;
+      r = (Math.round(r*100)/100)
       if (name!=='') {
         const calcRef = fb.database().ref('calculations');
         const calc = {
@@ -146,6 +186,23 @@ render() {
         </form>
           <input type="text" id='name' placeholder='calculation name'></input>
           <button id="calc" onClick={saveCalc}>SAVE</button>
+
+          <h4 class="savedCalcHead">% paid to Capital Amount per year</h4>
+          <div id = "table">
+          <table id="percentagePerYear" class="table" >
+            <thead class="thead-dark">
+              <tr id="tr">
+                <th>Year</th>
+                <th>Interest %</th>
+                <th>Capital %</th> 
+              </tr>
+            </thead>
+            <tbody id="bodPercentage">
+  
+            </tbody>
+        </table>
+        
+        </div>
       
       <SavedCalculationsComponent></SavedCalculationsComponent>
 

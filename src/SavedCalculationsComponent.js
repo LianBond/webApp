@@ -20,7 +20,7 @@ constructor(props) {
                   var content = '';
                   snapshot.forEach(function(data){
                       var val = data.val();
-                      console.log(val);
+                      //console.log(val);
                       content +='<tr>';
                       content += '<td>' + val.name + '</td>';
                       content += '<td>' + val.purchasePrice + '</td>';
@@ -30,7 +30,7 @@ constructor(props) {
                       content += '<td>' + val.ans + '</td>';
                       content += '</tr>';
                   });
-                  console.log(content);
+                  //console.log(content);
                   document.getElementById('bod').innerHTML = content;
               }
           });
