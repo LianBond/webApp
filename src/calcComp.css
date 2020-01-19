@@ -1,0 +1,14 @@
+.CalcComponent {
+    text-align: center;
+}
+
+#table {
+    margin: auto;
+    width: 60%;
+    border: 3px solid #73AD21;
+    padding-left: 10px;
+  }
+
+  th, td {
+      padding: 20px;
+  }
