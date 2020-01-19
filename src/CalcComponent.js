@@ -3,6 +3,17 @@ import calcImg from './calcImg.svg';
 import fb from './firebase.js';
 import './calcComp.css';
 import SavedCalculationsComponent from './SavedCalculationsComponent';
+import StackedBarGraphComponent from './stackedBarGraphComponent';
+import ReactDOM from 'react-dom';
+
+
+ //   dataPoints: [
+        //     { x: 1, y: 56 },
+        //     { x: 2, y: 45 },
+        //     { x: 3, y: 71 },
+        //     { x: 4, y: 41 },
+        //     { x: 5, y: 60 },
+        // ]
 
 export default class CalcComponent extends Component {
 
@@ -11,12 +22,18 @@ constructor(props) {
     }
 
 render() {
-      
+      var data1 = [];
+      var data2 = [];
       function doCalc() {
+        
         let pp = document.getElementById('purchasePrice').value;
         let dep = document.getElementById('dep').value;
         let term = (document.getElementById('term').value)*12;
         let r = (document.getElementById('r').value)/100/12;
+        if (term/12>60) {
+          alert('dont be silly!'); 
+          return;
+        }
         //make sure there are no null values
         if (pp == '') {
           pp = 0;
@@ -37,7 +54,7 @@ render() {
         let ans = above/below;
         console.log(ans)
         if (!isNaN(ans)) {
-          document.getElementById('z').innerHTML = 'Your monthly payment is: R'+ (Math.round(ans*100)/100);
+          document.getElementById('ans').innerHTML = 'Your monthly payment is: R'+ (Math.round(ans*100)/100);
           term = term/12;
           r=r*12;
           above = r*(pp-dep);
@@ -59,7 +76,8 @@ render() {
           content += '<td>' + percentagePaidToCapital+'%' + '</td>';
           content += '</tr>';
           document.getElementById('bodPercentage').innerHTML = content;
-          content ='';
+          data1[cnt-1] = {x: cnt, y: percentagePaidToCapital};
+          data2[cnt-1] = {x: cnt, y: percentagePaidToInterest};
           while (afterNMonth>=0.01) {
             cnt++;
             afterNMonth = afterNMonth*(1+r)-ans;
@@ -71,6 +89,8 @@ render() {
               percentagePaidToCapital = 100;
               percentagePaidToInterest = 0;
             }
+            data1[cnt-1] = {x: cnt, y: percentagePaidToCapital};
+            data2[cnt-1] = {x: cnt, y: percentagePaidToInterest};
             content +='<tr>';
             content += '<td>' + cnt + '</td>';
             content += '<td>' + percentagePaidToInterest+'%' + '</td>';
@@ -78,9 +98,14 @@ render() {
             content += '</tr>';
             document.getElementById('bodPercentage').innerHTML = content;
           }
-          console.log(cnt);
+          document.getElementById("repaymentSplit").style.display = 'block';
+          console.log(data1);
+          let data = [data1,data2];
+          ReactDOM.unmountComponentAtNode(document.getElementById('a'));
+          ReactDOM.render(<StackedBarGraphComponent data={data}></StackedBarGraphComponent>, document.getElementById('a'));
+          
         } else {
-          alert('Math Error. Please input valid values')
+          alert('Math Error. Please input valid values');
         }
     }
 
@@ -111,48 +136,41 @@ render() {
 
 
     function saveCalc() {
-      let pp = document.getElementById('purchasePrice').value;
-      let dep = document.getElementById('dep').value;
-      let term = (document.getElementById('term').value)*12;
-      let r = (document.getElementById('r').value)/100/12;
+      let pp = Number(document.getElementById('purchasePrice').value);
+      let dep = Number(document.getElementById('dep').value);
+      console.log(dep);
+      let term = (Number(document.getElementById('term').value)*12);
+      let r = Number((document.getElementById('r').value)/100/12);
+    
       
       let name = (document.getElementById('name').value);
       let above = r*(pp-dep);
       let below = 1-Math.pow((1+r),(-1*term));
       let ans = above/below;
       ans = (Math.round(ans*100)/100);
-      term = term/12;
-      r = r*100*12;
-      r = (Math.round(r*100)/100)
-      if (name!=='') {
-        const calcRef = fb.database().ref('calculations');
-        const calc = {
-          purchasePrice: pp,
-          deposit: dep,
-          term: term,
-          rate: r,
-          name: name,
-          ans: ans
+      if (!isNaN(ans)) {
+        term = term/12;
+        r = r*100*12;
+        r = (Math.round(r*100)/100);
+        if (name!=='') {
+          const calcRef = fb.database().ref('calculations');
+          const calc = {
+            purchasePrice: pp,
+            deposit: dep,
+            term: term,
+            rate: r,
+            name: name,
+            ans: ans
+          }
+          calcRef.push(calc);
+          alert('Record saved!')
+          showTable();
+        } else {
+          alert('the name field cant be empty!');
         }
-        calcRef.push(calc);
-        alert('Record saved!')
-        showTable();
       } else {
-        alert('the name field cant be empty!');
+        alert('Math Error. Please input valid values');
       }
-      /**handleSubmit(e) {
-  e.preventDefault();
-  const itemsRef = firebase.database().ref('items');
-  const item = {
-    title: this.state.currentItem,
-    user: this.state.username
-  }
-  itemsRef.push(item);
-  this.setState({
-    currentItem: '',
-    username: ''
-  });
-} */
     }
     
     return (<div className="comptext">
@@ -180,14 +198,14 @@ render() {
         </div>
         <div class="form-group">
           <button class="submit" type="button" onClick={doCalc}>CALCULATE</button>
-          <p id='z'>Your monthly payment is:</p>
         </div>
+          <b><h6 id='ans'>Your monthly payment is:</h6></b>
         </div>
         </form>
           <input type="text" id='name' placeholder='calculation name'></input>
           <button id="calc" onClick={saveCalc}>SAVE</button>
-
-          <h4 class="savedCalcHead">% paid to Capital Amount per year</h4>
+          <div id="repaymentSplit" style={{display: 'none'}}>
+          <h4 class="savedCalcHead">(Table of replayment splits) % paid to Capital Amount per year</h4>
           <div id = "table">
           <table id="percentagePerYear" class="table" >
             <thead class="thead-dark">
@@ -201,7 +219,9 @@ render() {
   
             </tbody>
         </table>
-        
+        <div id='a'></div>
+        {/* <StackedBarGraphComponent data1={data1} data2={data2}></StackedBarGraphComponent> */}
+        </div>
         </div>
       
       <SavedCalculationsComponent></SavedCalculationsComponent>
