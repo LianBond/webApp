@@ -5,10 +5,19 @@
 #table {
     margin: auto;
     width: 60%;
-    border: 3px solid #73AD21;
     padding-left: 10px;
   }
 
   th, td {
       padding: 20px;
+  }
+
+  .eq {
+      padding-top: 2px;
+      padding-bottom: 25px;
+  }
+
+  .savedCalcHead {
+    padding-top: 45px;
+    padding-bottom: 45px;
   }

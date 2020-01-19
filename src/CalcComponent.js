@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import calcImg from './calcImg.svg';
 import fb from './firebase.js';
 import './calcComp.css';
+import SavedCalculationsComponent from './SavedCalculationsComponent';
 
 export default class CalcComponent extends Component {
 
@@ -10,17 +11,42 @@ constructor(props) {
     }
 
 render() {
-      console.log(document.getElementsByTagName("style")[2]);
+      
       function doCalc() {
         let pp = document.getElementById('purchasePrice').value;
         let dep = document.getElementById('dep').value;
         let term = (document.getElementById('term').value)*12;
         let r = (document.getElementById('r').value)/100/12;
+        //make sure there are no null values
+        if (pp == '') {
+          pp = 0;
+          console.log(true);
+        }
+        if (dep == '') {
+          dep = 0;
+        }
+        if (term == '') {
+          term = 0;
+        }
+        if (r == '') {
+          r = 0;
+        }
+        
         let above = r*(pp-dep);
         let below = 1-Math.pow((1+r),(-1*term));
         let ans = above/below;
-        
-        document.getElementById('z').innerHTML = 'Your monthly payment is: R'+ans;
+        console.log(ans)
+        if (!isNaN(ans)) {
+          document.getElementById('z').innerHTML = 'Your monthly payment is: R'+ans;
+
+          let loanAmount = pp-dep;
+          let afterNMonth = loanAmount*(1+r)-ans;
+          let percentagePaidToCapital = ((loanAmount-afterNMonth)/loanAmount)*100;
+          let percentagePaidToInterest = 100 - percentagePaidToCapital;
+          console.log(percentagePaidToCapital);
+        } else {
+          alert('Math Error. Please input valid values')
+        }
     }
 
     function showTable() {
@@ -47,17 +73,7 @@ render() {
         });
     }
 
-    function toggleTable(first) {
-        
-        var x = document.getElementById("table");
-        if (x.style.display === "none") {
-          x.style.display = "block";
-          showTable();
-        } else {
-          x.style.display = "none";
-        }
-      
-    }
+
 
     function saveCalc() {
       let pp = document.getElementById('purchasePrice').value;
@@ -100,36 +116,38 @@ render() {
     }
     
     return (<div className="comptext">
-      <h2>Fixed term mortgage calculator</h2><br></br>
-      <img src={calcImg}></img><br></br>
-      <input type="number" id='purchasePrice' placeholder='purchase price'></input><br></br>
-      <input type="number" id='dep' placeholder='deposit'></input><br></br>
-      <input type="number" id='term' placeholder='bond term (years)'></input><br></br>
-      <input type="number" id='r' placeholder='fixed interest rate (yearly)'></input><br></br>
-      <button id="calc" onClick={doCalc}>CALCULATE</button><br></br>
-      <p id='z'>Your monthly payment is:</p><br></br>
-      <input type="text" id='name' placeholder='calculation name'></input><button id="calc" onClick={saveCalc}>SAVE</button><br></br>
-      <button id="toggleTable" onClick={toggleTable}>TOGGLE TABLE</button><br></br>
-      {/* </div><table style="width:100%" id="ex-table"> */}
       
-      <div id = "table">
-        <table id="savedCalcs" >
-          <thead>
-            <tr id="tr">
-              <th>Name</th>
-              <th>Purchase price</th>
-              <th>Deposit</th> 
-              <th>Term</th>
-              <th>Rate</th>
-              <th>Monthly payment</th>
-            </tr>
-          </thead>
-          <tbody id="bod">
-
-          </tbody>
-      </table>
-      <script>toggleTable()</script>
-      </div>
+      <h4>Fixed term mortgage calculator</h4><br></br>
+      <img class="eq" src={calcImg}></img><br></br>
+      <form >
+      <div class="form-check">
+        <div class="form-group">
+          <label for='purchasePrice'>Purchase price (R)</label><br></br>
+          <input type="number" id='purchasePrice' placeholder='purchase price'>
+          </input>
+        </div>
+        <div class="form-group">
+          <label for='dep'>Deposit (R)</label><br></br>
+          <input type="number" id='dep' placeholder='deposit'></input>
+        </div>
+        <div class="form-group">
+          <label for='term'>Bond term (years)</label><br></br>
+          <input type="number" id='term' placeholder='bond term (years)'></input>
+        </div>
+        <div class="form-group">
+          <label for="r">fixed interest rate (yearly %)</label><br></br>
+          <input type="number" id='r' placeholder='fixed interest rate (yearly)'></input>
+        </div>
+        <div class="form-group">
+          <button class="submit" type="button" onClick={doCalc}>CALCULATE</button>
+          <p id='z'>Your monthly payment is:</p>
+        </div>
+        </div>
+        </form>
+          <input type="text" id='name' placeholder='calculation name'></input>
+          <button id="calc" onClick={saveCalc}>SAVE</button>
+      
+      <SavedCalculationsComponent></SavedCalculationsComponent>
 
     </div>)
     

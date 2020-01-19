@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo6.svg';
+import logo from './logo8.svg';
 import './App.css';
 import CalcComponent from './CalcComponent'
 
@@ -12,8 +12,9 @@ class App extends Component {
           <h1 className="App-title">Welcome to The Financial Calculator WebApp</h1>
         </header>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+          This is a homework project for a lifecheq developer position
         </p>
+        <hr></hr>
         <CalcComponent displaytext="First Component Data"/>
       </div>
 );
