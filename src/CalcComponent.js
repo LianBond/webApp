@@ -2,18 +2,10 @@ import React, {Component} from 'react';
 import calcImg from './calcImg.svg';
 import fb from './firebase.js';
 import './calcComp.css';
+import Chart from 'chart.js';
 import SavedCalculationsComponent from './SavedCalculationsComponent';
-import StackedBarGraphComponent from './stackedBarGraphComponent';
 import ReactDOM from 'react-dom';
-
-
- //   dataPoints: [
-        //     { x: 1, y: 56 },
-        //     { x: 2, y: 45 },
-        //     { x: 3, y: 71 },
-        //     { x: 4, y: 41 },
-        //     { x: 5, y: 60 },
-        // ]
+var Plotly = require('plotly')("LianBond", "Mvty3c792bQaOfxMeHtX");
 
 export default class CalcComponent extends Component {
 
@@ -22,15 +14,56 @@ constructor(props) {
     }
 
 render() {
-      var data1 = [];
-      var data2 = [];
+      
+      function makeChart(x,data1,data2) {
+        var trace1 = {
+          x: x,
+          y: data1,
+          name: '% paid to Capital',
+          type: 'bar'
+        };
+        
+        var trace2 = {
+          x: x,
+          y: data2,
+          name: '% paid to interest',
+          type: 'bar'
+        };
+        
+        var data = [trace1, trace2];
+        
+        var layout = {barmode: 'stack',fileopt : "overwrite", filename : "simple-node-example"};
+        
+        Plotly.plot(data, layout);
+        var a = document.getElementById('a');
+        a.innerHTML = `
+        <a href="https://plot.ly/~LianBond/0/?share_key=uf1LNYnWZPFlUIuaKedwa4" target="_blank" title="simple-node-example" style="display: block; text-align: center;"><img id="ch" src="https://i.ibb.co/rMYbbDj/load.jpg" alt="simple-node-example" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://i.ibb.co/rMYbbDj/load.jpg';" /></a>
+        <script data-plotly="LianBond:0" sharekey-plotly="uf1LNYnWZPFlUIuaKedwa4" src="https://plot.ly/embed.js" async></script>
+      `
+        load();
+      }
+
+      async function load() {
+        
+        setTimeout(function () {
+          
+            var source = 'https://plot.ly/~LianBond/0.png?share_key=uf1LNYnWZPFlUIuaKedwa4',
+            timestamp = (new Date()).getTime(),
+            newUrl = source + '?_=' + timestamp;
+            document.getElementById("ch").src = newUrl;
+          
+      }, 5000);
+        
+        
+      }
+
       function doCalc() {
         
         let pp = document.getElementById('purchasePrice').value;
         let dep = document.getElementById('dep').value;
         let term = (document.getElementById('term').value)*12;
         let r = (document.getElementById('r').value)/100/12;
-        if (term/12>60) {
+        if (term/12>80) {
           alert('dont be silly!'); 
           return;
         }
@@ -76,8 +109,10 @@ render() {
           content += '<td>' + percentagePaidToCapital+'%' + '</td>';
           content += '</tr>';
           document.getElementById('bodPercentage').innerHTML = content;
-          data1[cnt-1] = {x: cnt, y: percentagePaidToCapital};
-          data2[cnt-1] = {x: cnt, y: percentagePaidToInterest};
+          var data1 = [];
+          var data2 = [];
+          data1.push(percentagePaidToCapital);
+          data2.push(percentagePaidToInterest);
           while (afterNMonth>=0.01) {
             cnt++;
             afterNMonth = afterNMonth*(1+r)-ans;
@@ -89,8 +124,8 @@ render() {
               percentagePaidToCapital = 100;
               percentagePaidToInterest = 0;
             }
-            data1[cnt-1] = {x: cnt, y: percentagePaidToCapital};
-            data2[cnt-1] = {x: cnt, y: percentagePaidToInterest};
+            data1.push(percentagePaidToCapital);
+            data2.push(percentagePaidToInterest);
             content +='<tr>';
             content += '<td>' + cnt + '</td>';
             content += '<td>' + percentagePaidToInterest+'%' + '</td>';
@@ -100,9 +135,13 @@ render() {
           }
           document.getElementById("repaymentSplit").style.display = 'block';
           console.log(data1);
-          let data = [data1,data2];
-          ReactDOM.unmountComponentAtNode(document.getElementById('a'));
-          ReactDOM.render(<StackedBarGraphComponent data={data}></StackedBarGraphComponent>, document.getElementById('a'));
+          var x = [];
+          for (var i = 0; i<cnt; i++) {
+            x.push('year ' + (i+1));
+          }
+          console.log(x);
+
+          makeChart(x,data1,data2);
           
         } else {
           alert('Math Error. Please input valid values');
@@ -121,7 +160,7 @@ render() {
                     content +='<tr>';
                     content += '<td>' + val.name + '</td>';
                     content += '<td>' + val.purchasePrice + '</td>';
-                    content += '<td>' + val.dep + '</td>';
+                    content += '<td>' + val.deposit + '</td>';
                     content += '<td>' + val.term + '</td>';
                     content += '<td>' + val.rate + '</td>';
                     content += '<td>' + val.ans + '</td>';
@@ -193,7 +232,7 @@ render() {
           <input type="number" id='term' placeholder='bond term (years)'></input>
         </div>
         <div class="form-group">
-          <label for="r">fixed interest rate (yearly %)</label><br></br>
+          <label for="r">Fixed interest rate (yearly %)</label><br></br>
           <input type="number" id='r' placeholder='fixed interest rate (yearly)'></input>
         </div>
         <div class="form-group">
@@ -220,7 +259,6 @@ render() {
             </tbody>
         </table>
         <div id='a'></div>
-        {/* <StackedBarGraphComponent data1={data1} data2={data2}></StackedBarGraphComponent> */}
         </div>
         </div>
       
