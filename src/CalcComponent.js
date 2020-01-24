@@ -15,6 +15,9 @@ constructor(props) {
 
 render() {
       
+      /**
+       * This generates a chart on plotly online that we'll retrieve to display
+       */
       function makeChart(x,data1,data2) {
         var trace1 = {
           x: x,
@@ -36,6 +39,7 @@ render() {
         
         Plotly.plot(data, layout);
         var a = document.getElementById('a');
+        
         a.innerHTML = `
         <a href="https://plot.ly/~LianBond/0/?share_key=uf1LNYnWZPFlUIuaKedwa4" target="_blank" title="simple-node-example" style="display: block; text-align: center;"><img id="ch" src="https://i.ibb.co/rMYbbDj/load.jpg" alt="simple-node-example" style="max-width: 100%;width: 600px;"  width="600" onerror="this.onerror=null;this.src='https://i.ibb.co/rMYbbDj/load.jpg';" /></a>
         <script data-plotly="LianBond:0" sharekey-plotly="uf1LNYnWZPFlUIuaKedwa4" src="https://plot.ly/embed.js" async></script>
@@ -43,6 +47,9 @@ render() {
         load();
       }
 
+      /**
+       * retrieve the plot just created
+       */
       async function load() {
         
         setTimeout(function () {
@@ -57,13 +64,19 @@ render() {
         
       }
 
+      /**
+       * This function reads the input fields and does the calculation
+       */
       function doCalc() {
         
         let pp = document.getElementById('purchasePrice').value;
         let dep = document.getElementById('dep').value;
         let term = (document.getElementById('term').value)*12;
         let r = (document.getElementById('r').value)/100/12;
-        if (term/12>80) {
+        /**
+         * If the user types in values to calculate that will make the Javascript block, we don't do the calculation
+         */
+        if ((term/12)>80 || (r*100*12)>300) {
           alert('dont be silly!'); 
           return;
         }
@@ -100,6 +113,9 @@ render() {
           let percentagePaidToCapital = ((loanAmount-afterNMonth)/loanAmount)*100;
           let percentagePaidToInterest = 100 - percentagePaidToCapital;
           let content='';
+          /**
+           * Here we calculate the repayment splits and add it to a table
+           */
           percentagePaidToInterest =  Math.round(percentagePaidToInterest);
           percentagePaidToCapital = Math.round(percentagePaidToCapital);
           document.getElementById('bodPercentage').innerHTML = '';
@@ -148,6 +164,9 @@ render() {
         }
     }
 
+    /**
+     * This function queries the database and shows the saved calculations
+     */
     function showTable() {
       var database = fb.database();
         database = database.ref().child("calculations")
@@ -173,7 +192,9 @@ render() {
     }
 
 
-
+    /**
+     * This function saves the calculation entered by the user and then re-renders the table
+     */
     function saveCalc() {
       let pp = Number(document.getElementById('purchasePrice').value);
       let dep = Number(document.getElementById('dep').value);

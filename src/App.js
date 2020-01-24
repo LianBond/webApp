@@ -6,6 +6,7 @@ import CalcComponent from './CalcComponent'
 class App extends Component {
   render() {
     return (
+      
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
@@ -15,7 +16,7 @@ class App extends Component {
           This is a homework project for a lifecheq developer position
         </p>
         <hr></hr>
-        <CalcComponent displaytext="First Component Data"/>
+        <CalcComponent/>
       </div>
 );
   }

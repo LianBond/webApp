@@ -13,6 +13,9 @@ constructor(props) {
 
     render() {
       
+        /**
+         * this generates the initial saved calculations table when the website is loaded
+         */
         var database = fb.database();
           database = database.ref().child("calculations")
           database.once('value', function(snapshot){
